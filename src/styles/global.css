@@ -4,6 +4,8 @@
     box-sizing: border-box;
 }
 
+/* 1 rem = 10px */
+
 html {
     font-size: 62.5%;
 }
