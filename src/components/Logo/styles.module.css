@@ -1,9 +1,9 @@
 .logo {
- 	display: flex;
- 	align-items: center;
- 	justify-content: center;
- 	gap: 2.4rem;
-	margin-top: 3.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2.4rem;
+    margin-top: 3.2rem;
 }
 
 .logoLink {
@@ -20,7 +20,7 @@
 }
 
 .logoLink:hover {
-    filter: brightness(50%);
+    filter: brightness(80%);
 }
 
 .logoLink svg {
