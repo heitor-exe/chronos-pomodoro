@@ -8,15 +8,15 @@ export function MainForm() {
     <form className="form" action="">
       <div className="formRow">
         <DefaultInput
-          labelText="Task"
-          id="inputTask"
+          labelText="task"
+          id="meuInput"
           type="text"
-          placeholder="Digite algo..."
+          placeholder="Digite algo"
         />
       </div>
 
       <div className="formRow">
-        <p>Lorem ipsum dolor sit amet.</p>
+        <p>Próximo intervalo é de 25min</p>
       </div>
 
       <div className="formRow">
@@ -24,7 +24,7 @@ export function MainForm() {
       </div>
 
       <div className="formRow">
-        <DefaultButton icon={<PlayCircleIcon />} color="green" />
+        <DefaultButton icon={<PlayCircleIcon />} />
       </div>
     </form>
   );
