@@ -2,17 +2,59 @@ import { PlayCircleIcon } from "lucide-react";
 import { Cycles } from "../Cycles";
 import { DefaultButton } from "../DefaultButton";
 import { DefaultInput } from "../DefaultInput";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import type { TaskModel } from "../../models/TaskModel";
+import { useTaskContext } from "../../contexts/TaskContext/useTaskContext";
+import { getNextCycle } from "../../utils/getNexCycle";
+import { getNextCycleType } from "../../utils/getNextCycleType";
 
 export function MainForm() {
-  const [taskName, setTaskName] = useState("");
+  const { state, setState } = useTaskContext();
+  const nextCycle = getNextCycle(state.currentCycle);
+  const nextCycleType = getNextCycleType(nextCycle);
+  const taskNameInput = useRef<HTMLInputElement>(null);
 
   function handleCreateNewTask(event: React.FormEvent) {
     event.preventDefault();
-    console.log("Deu certo");
 
-    console.log(taskName);
+    if (taskNameInput.current === null) return;
+
+    const taskName = taskNameInput.current.value.trim(); // trim -> remove espaços
+
+    if (!taskName) {
+      alert("Por favor, digite o nome da tarefa.");
+      return;
+    }
+
+    const newTask: TaskModel = {
+      id: Date.now().toString(),
+      name: taskName,
+      startDate: Date.now(),
+      completeDate: null,
+      duration: 1,
+      interruptDate: null,
+      type: nextCycleType,
+    };
+
+    const secondsRemaining = newTask.duration * 60;
+
+    setState((prevState) => {
+      return {
+        ...prevState,
+        config: {
+          ...prevState.config,
+        },
+        activeTask: newTask,
+        currentCycle: nextCycle,
+        secondsRemaining: secondsRemaining,
+        formattedSecondsRemaining: "00:00",
+        tasks: [...prevState.tasks, newTask],
+      };
+    });
   }
+
+  // useState -> usado para ter o componente em tempo real.
+  // useRef -> não causa re-renderização do componente.
 
   return (
     <form onSubmit={handleCreateNewTask} className="form">
@@ -22,8 +64,7 @@ export function MainForm() {
           id="meuInput"
           type="text"
           placeholder="Digite algo"
-          value={taskName}
-          onChange={(event) => setTaskName(event.target.value)}
+          ref={taskNameInput}
         />
       </div>
 
