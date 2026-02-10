@@ -5,25 +5,27 @@ import { DefaultInput } from "../DefaultInput";
 import { useRef } from "react";
 import type { TaskModel } from "../../models/TaskModel";
 import { useTaskContext } from "../../contexts/TaskContext/useTaskContext";
-import { getNextCycle } from "../../utils/getNexCycle";
+import { getNextCycle } from "../../utils/getNextCycle";
 import { getNextCycleType } from "../../utils/getNextCycleType";
-import { formatSecondsToMinutes } from "../../utils/formatSecondsToMinutes";
+import { TaskActionTypes } from "../../contexts/TaskContext/taskActions";
 
 export function MainForm() {
-  const { state, setState } = useTaskContext();
-  const nextCycle = getNextCycle(state.currentCycle);
-  const nextCycleType = getNextCycleType(nextCycle);
+  const { state, dispatch } = useTaskContext();
   const taskNameInput = useRef<HTMLInputElement>(null);
 
-  function handleCreateNewTask(event: React.FormEvent) {
+  // ciclos
+  const nextCycle = getNextCycle(state.currentCycle);
+  const nextCyleType = getNextCycleType(nextCycle);
+
+  function handleCreateNewTask(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (taskNameInput.current === null) return;
 
-    const taskName = taskNameInput.current.value.trim(); // trim -> remove espaços
+    const taskName = taskNameInput.current.value.trim();
 
     if (!taskName) {
-      alert("Por favor, digite o nome da tarefa.");
+      alert("Digite o nome da tarefa");
       return;
     }
 
@@ -33,54 +35,19 @@ export function MainForm() {
       startDate: Date.now(),
       completeDate: null,
       interruptDate: null,
-      duration: state.config[nextCycleType],
-      type: nextCycleType,
+      duration: state.config[nextCyleType],
+      type: nextCyleType,
     };
 
-    const secondsRemaining = newTask.duration * 60;
-
-    setState((prevState) => {
-      return {
-        ...prevState,
-        config: {
-          ...prevState.config,
-        },
-        activeTask: newTask,
-        currentCycle: nextCycle,
-        secondsRemaining: secondsRemaining,
-        formattedSecondsRemaining: formatSecondsToMinutes(secondsRemaining),
-        tasks: [...prevState.tasks, newTask],
-      };
-    });
+    dispatch({ type: TaskActionTypes.START_TASK, payload: newTask });
   }
 
-  function handleInterruptTask(event: React.MouseEvent) {
-    event.preventDefault();
-
-    setState((prevState) => {
-      return {
-        ...prevState,
-        activeTask: null,
-        secondsRemaining: 0,
-        formattedSecondsRemaining: "00:00",
-        tasks: prevState.tasks.map((task) => {
-          if (prevState.activeTask && prevState.activeTask.id === task.id) {
-            return {
-              ...task,
-              interruptDate: Date.now(),
-            };
-          }
-          return task;
-        }),
-      };
-    });
+  function handleInterruptTask() {
+    dispatch({ type: TaskActionTypes.INTERRUPT_TASK });
   }
-
-  // useState -> usado para ter o componente em tempo real.
-  // useRef -> não causa re-renderização do componente.
 
   return (
-    <form onSubmit={handleCreateNewTask} className="form">
+    <form onSubmit={handleCreateNewTask} className="form" action="">
       <div className="formRow">
         <DefaultInput
           labelText="task"
@@ -88,7 +55,7 @@ export function MainForm() {
           type="text"
           placeholder="Digite algo"
           ref={taskNameInput}
-          disabled={state.activeTask !== null}
+          disabled={!!state.activeTask}
         />
       </div>
 
@@ -109,10 +76,11 @@ export function MainForm() {
             title="Iniciar nova tarefa"
             type="submit"
             icon={<PlayCircleIcon />}
+            key="botao_submit"
           />
         )}
 
-        {state.activeTask && (
+        {!!state.activeTask && (
           <DefaultButton
             aria-label="Interromper tarefa atual"
             title="Interromper tarefa atual"
@@ -120,6 +88,7 @@ export function MainForm() {
             color="red"
             icon={<StopCircleIcon />}
             onClick={handleInterruptTask}
+            key="botao_button"
           />
         )}
       </div>
